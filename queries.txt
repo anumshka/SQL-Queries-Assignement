@@ -209,3 +209,143 @@ ON customers.city = salespeople.city;
  1008 | Fran   | 2001 | Hoffman
 (8 rows)
 
+--11) Find all the customers in SanJose who have a rating above 200.
+SELECT cnum,cname 
+FROM CUSTOMERS 
+WHERE rating > 200
+AND city = 'SanJose';
+
+ cnum |  cname   
+------+----------
+ 2008 | Cisneros
+(1 row)
+
+
+--12) List the names and commissions of all salespeople in London.
+SELECT sname,comm
+FROM Salespeople
+WHERE city = 'London';
+
+sname  | comm 
+--------+------
+ Peel   |   12
+ Motika |   11
+ Fran   |   25
+(3 rows)
+
+
+--13) List all the orders of Salesperson Motika from the orders table.
+SELECT onum
+FROM orders JOIN salespeople
+ON orders.snum = salespeople.snum
+WHERE sname='Motika';
+
+onum 
+------
+ 3002
+(1 row)
+
+
+--14) Find all customers who booked orders on October 3. 
+SELECT cnum
+FROM orders
+WHERE odate='1990-03-10';
+
+ cnum 
+------
+ 2008
+ 2001
+ 2007
+ 2003
+ 2008
+(5 rows)
+
+
+--15) Give the sums of the amounts from the Orders table, grouped by date, eliminating all those dates where the SUM was not at least 2000 above the maximum Amount
+SELECT odate,SUM(amt)
+FROM orders o1
+GROUP BY odate 
+HAVING SUM(amt) >
+(SELECT MAX(amt)+2000
+FROM orders o2
+WHERE o1.odate = o2.odate);
+
+
+   odate    |   sum   
+------------+---------
+ 1990-03-10 | 8944.59
+(1 row)
+
+
+--16) Select all orders that had amounts that were greater than at least one of the orders from October 6. 
+SELECT amt 
+FROM orders
+WHERE amt > 
+ANY(SELECT amt FROM orders WHERE odate = '1990-06-10');
+
+  amt   
+---------
+ 1900.10
+ 5160.45
+ 1713.23
+ 4723.00
+ 9891.88
+(5 rows)
+
+
+--17) Write a query that uses the EXISTS operator to extract all salespeople who have customers with a rating of 300. 
+SELECT snum,sname 
+FROM salespeople 
+WHERE EXISTS
+(SELECT snum 
+FROM customers
+WHERE rating = 300 
+and salespeople.snum = customers.snum );
+
+ snum | sname  
+------+--------
+ 1002 | Serres
+ 1007 | Rifkin
+(2 rows)
+
+
+--18) Find all customers whose cnum is 1000 above the snum of Serres. 
+SELECT cnum 
+FROM customers 
+WHERE
+cnum=1000+
+(SELECT snum 
+FROM salespeople
+WHERE sname = 'Serres');
+
+cnum 
+------
+ 2002
+(1 row)
+
+
+--19) Give the salespeople’s commissions as percentages instead of decimal numbers. 
+SELECT comm*100 AS comm
+FROM salespeople;
+
+ comm 
+------
+ 1200
+ 1300
+ 1100
+ 1500
+ 1000
+ 2500
+(6 rows)
+
+
+--20) Find the largest order taken by each salesperson on each date, eliminating those Maximum orders, which are less than 3000. 
+SELECT odate,MAX(amt)
+FROM orders
+GROUP BY odate
+HAVING MAX(amt) < 3000;
+
+ odate    |   max   
+------------+---------
+ 1990-04-10 | 1713.23
+(1 row)
