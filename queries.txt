@@ -467,4 +467,143 @@ GROUP BY snum;
  1007 | 1098.16
 (2 rows)
 
+--31) Sort the salespeople table in the following order: snum, sname, commission, city.
+SELECT * 
+FROM salespeople
+ORDER BY snum,sname,comm,city;
+
+ snum |  sname  |   city    | comm 
+------+---------+-----------+------
+ 1001 | Peel    | London    |   12
+ 1002 | Serres  | SanJose   |   13
+ 1003 | AxelRod | NeyYork   |   10
+ 1004 | Motika  | London    |   11
+ 1007 | Rifkin  | Barcelona |   15
+ 1008 | Fran    | London    |   25
+(6 rows)
+
+
+--32) Select all customers whose names fall in between ‘A’ and ‘G’ alphabetical range.
+SELECT cname 
+FROM customers
+WHERE cname SIMILAR TO '[A-G]%';
+
+cname   
+----------
+ Giovanni
+ Grass
+ Clemens
+ Cisneros
+(4 rows)
+
+--33) Select all the possible combinations of customers you can assign.
+
+
+--34) Select all orders that are greater than the average for October 4.
+SELECT onum,amt
+FROM orders
+WHERE amt >
+(SELECT AVG(amt) 
+FROM orders
+WHERE odate = '1990-10-04');
+
+onum |   amt   
+------+---------
+ 3002 | 1900.10
+ 3005 | 5160.45
+ 3006 | 1098.16
+ 3009 | 1713.23
+ 3008 | 4723.00
+ 3010 | 1309.95
+ 3011 | 9891.88
+(7 rows)
+
+--35) Write a select command using correlated subquery that selects the names and numbers of all customers with ratings equal to the maximum for their city.
+SELECT cnum,cname
+FROM customers c1
+WHERE 
+rating = (SELECT MAX(rating) FROM customers
+		 WHERE city=c1.city);
+
+ cnum |  cname   
+------+----------
+ 2001 | Hoffman
+ 2002 | Giovanni
+ 2004 | Grass
+ 2006 | Clemens
+ 2008 | Cisneros
+(5 rows)
+
+--36) Write a query that totals the orders for each day and places the results in descending order.
+SELECT odate,SUM(amt)
+FROM orders
+GROUP BY odate
+ORDER BY SUM(amt) DESC;
+
+ odate    |   sum    
+------------+----------
+ 1990-10-06 | 11201.83
+ 1990-10-03 |  8944.59
+ 1990-10-05 |  4723.00
+ 1990-10-04 |  1788.98
+(4 rows)
+
+--37) Write a select command that produces the rating followed by the name of each customer in SanJose.
+SELECT rating,cname
+FROM customers
+WHERE city = 'SanJose';
+
+rating |  cname   
+--------+----------
+    200 | Liu
+    300 | Cisneros
+(2 rows)
+
+--38) Find all orders with amounts smaller than any amount for a customer in SanJose.
+SELECT onum
+FROM orders WHERE 
+amt < ANY(SELECT amt
+FROM customers JOIN orders
+ON customers.cnum = orders.cnum
+WHERE city = 'SanJose');
+
+onum 
+------
+ 3001
+ 3003
+ 3002
+ 3006
+ 3009
+ 3007
+ 3008
+ 3010
+(8 rows)
+
+--39) Find all orders with above average amounts for their customers.
+SELECT * 
+FROM orders o1
+WHERE amt >
+    (SELECT AVG(amt) FROM orders o2
+     WHERE o1.cnum = o2.cnum);
+
+onum |   amt   |   odate    | cnum | snum 
+------+---------+------------+------+------
+ 3006 | 1098.16 | 1990-10-03 | 2008 | 1007
+ 3010 | 1309.95 | 1990-10-06 | 2004 | 1002
+ 3011 | 9891.88 | 1990-10-06 | 2006 | 1001
+(3 rows)
+
+--40) Write a query that selects the highest rating in each city.
+SELECT city,MAX(rating)
+FROM customers
+GROUP BY city;
+
+  city   | max 
+---------+-----
+ Rome    | 200
+ SanJose | 300
+ Berlin  | 300
+ London  | 100
+(4 rows)
+
 
