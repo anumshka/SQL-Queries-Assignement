@@ -606,4 +606,162 @@ GROUP BY city;
  London  | 100
 (4 rows)
 
+--41) Write a query that calculates the amount of the salesperson’s commission on each order by a customer with a rating above 100.00.
+SELECT amt,comm
+FROM salespeople JOIN customers 
+ON salespeople.snum = customers.snum
+JOIN orders 
+ON orders.snum = customers.snum
+WHERE rating>100;
+
+   amt   | comm 
+---------+------
+   18.69 |   15
+ 5160.45 |   13
+ 5160.45 |   13
+ 1098.16 |   15
+ 1713.23 |   10
+   75.75 |   13
+   75.75 |   13
+ 1309.95 |   13
+ 1309.95 |   13
+(9 rows)
+
+
+--42) Count the customers with ratings above SanJose’s average.
+SELECT COUNT(cnum) FROM customers
+WHERE rating >
+(SELECT AVG(rating) FROM customers
+WHERE city = 'SanJose');
+
+count 
+-------
+     2
+(1 row)
+
+
+--43) Find all salespeople that are located in either Barcelona or London.
+SELECT snum,sname
+FROM salespeople
+WHERE city = 'Barcelona'
+OR city = 'London';
+
+ snum | sname  
+------+--------
+ 1001 | Peel
+ 1004 | Motika
+ 1007 | Rifkin
+ 1008 | Fran
+(4 rows)
+
+
+--44) Find all salespeople with only one customer.
+SELECT snum,sname 
+FROM salespeople
+WHERE snum IN (
+   SELECT DISTINCT snum
+   FROM customers c1 
+   WHERE NOT EXISTS (
+      SELECT * FROM customers c2 
+      WHERE c1.snum = c2.snum 
+      AND c1.cname <> c2.cname));
+
+ snum |  sname  
+------+---------
+ 1004 | Motika
+ 1007 | Rifkin
+ 1003 | AxelRod
+(3 rows)
+
+
+--45) Write a query that joins the Customer table to itself to find all pairs or customers served by a single salesperson.
+
+
+--46) Write a query that will give you all orders for more than $1000.00.
+SELECT onum 
+from orders
+WHERE amt > 1000;
+
+ onum 
+------
+ 3002
+ 3005
+ 3006
+ 3009
+ 3008
+ 3010
+ 3011
+(7 rows)
+
+--47) Write a query that lists each order number followed by the name of the customer who made that order.
+SELECT onum,cname
+FROM orders JOIN customers
+ON customers.cnum = orders.cnum;
+
+onum |  cname   
+------+----------
+ 3001 | Cisneros
+ 3003 | Hoffman
+ 3002 | Pereira
+ 3005 | Liu
+ 3006 | Cisneros
+ 3009 | Giovanni
+ 3007 | Grass
+ 3008 | Clemens
+ 3010 | Grass
+ 3011 | Clemens
+(10 rows)
+
+--48) Write a query that selects all the customers whose ratings are equal to or greater than ANY(in the SQL sense) of ‘Serres’.
+SELECT cnum,cname 
+FROM customers
+WHERE rating >=
+ANY(SELECT rating 
+FROM customers JOIN salespeople
+ON customers.snum = salespeople.snum
+WHERE sname = 'Serres');
+
+ cnum |  cname   
+------+----------
+ 2002 | Giovanni
+ 2003 | Liu
+ 2004 | Grass
+ 2008 | Cisneros
+(4 rows)
+
+
+--49) Write two queries that will produce all orders taken on October 3 or October 4.
+SELECT onum 
+FROM orders
+WHERE odate = '1990-10-04'
+OR odate = '1990-10-03';
+
+SELECT onum 
+FROM orders
+WHERE odate BETWEEN '1990-10-03' AND '1990-10-04';
+
+ onum 
+------
+ 3001
+ 3003
+ 3002
+ 3005
+ 3006
+ 3009
+ 3007
+(7 rows)
+
+--50) Find only those customers whose ratings are higher than every customer in Rome.
+SELECT cnum 
+FROM customers
+WHERE rating > 
+ALL (SELECT rating 
+FROM customers
+WHERE city = 'Rome');
+
+ cnum 
+------
+ 2004
+ 2008
+(2 rows)
 
