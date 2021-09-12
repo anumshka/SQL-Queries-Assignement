@@ -1212,3 +1212,147 @@ GROUP BY cnum;
  2001 |  767.19
 (7 rows)
 
+--81) Write a query that selects the first customer in alphabetical order whose name begins with ‘G’.
+SELECT cname 
+FROM customers
+WHERE cname LIKE 'G%'
+ORDER BY cname
+LIMIT 1;
+
+ cname   
+----------
+ Giovanni
+(1 row)
+
+
+--82) Write a query that counts the number of different non NULL city values in the customers table.
+SELECT COUNT(city)
+FROM customers
+WHERE city IS NOT NULL;
+
+count 
+-------
+     7
+(1 row)
+
+
+--83) Find the average amount from the Orders Table.
+SELECT AVG(amt)
+FROM orders;
+
+      avg          
+-----------------------
+ 2665.8400000000000000
+(1 row)
+
+--84) Find all customers who are not located in SanJose and whose rating is above 200.
+SELECT cnum,cname FROM customers 
+WHERE city != 'SanJose'
+AND rating > 200;
+
+ cnum | cname 
+------+-------
+ 2004 | Grass
+(1 row)
+
+
+--85) Give a simpler way to write this query.SELECT snum, sname, city, comm FROM salespeople WHERE (comm > + 0.12 OR comm < 0.14);
+--We have to basically select every comm as every comm is either > 12 or < 14
+SELECT snum,sname,city,comm 
+FROM salespeople;
+
+ snum |  sname  |   city    | comm 
+------+---------+-----------+------
+ 1001 | Peel    | London    |   12
+ 1002 | Serres  | SanJose   |   13
+ 1004 | Motika  | London    |   11
+ 1007 | Rifkin  | Barcelona |   15
+ 1003 | AxelRod | New York  |   10
+ 1008 | Fran    | London    |   25
+(6 rows)
+
+
+--86) Which salespersons attend to customers not in the city they have been assigned to?
+SELECT s.snum 
+FROM salespeople s JOIN customers c
+ON s.snum = c.snum
+WHERE s.city != c.city;
+
+ snum 
+------
+ 1003
+ 1002
+ 1007
+ 1004
+(4 rows)
+
+
+--87) Which salespeople get commission greater than 0.11 are serving customers rated less than 250?
+SELECT DISTINCT(s.snum) 
+FROM salespeople s JOIN customers c
+ON s.snum = c.snum
+WHERE comm > 11 AND rating < 250;
+
+ snum 
+------
+ 1002
+ 1001
+(2 rows)
+
+--88) Which salespeople have been assigned to the same city but get different commission percentages?
+SELECT DISTINCT(s2.snum),s2.sname
+FROM salespeople s1 JOIN salespeople s2
+ON s1.city = s2.city
+AND s1.sname != s2.sname
+AND s1.comm != s2.comm;
+
+
+ snum | sname  
+------+--------
+ 1004 | Motika
+ 1001 | Peel
+ 1008 | Fran
+(3 rows)
+
+
+--89) Which salesperson has earned the maximum commission?(comm in the table as integer)
+SELECT snum,sname
+FROM salespeople 
+WHERE comm IN
+(SELECT MAX(comm) FROM salespeople);
+
+ snum | sname 
+------+-------
+ 1008 | Fran
+(1 row)
+
+
+--90) Does the customer who has placed the maximum number of orders have the maximum rating?
+--Customers with max nummber of orders
+SELECT cnum 
+FROM orders
+GROUP BY cnum
+HAVING COUNT(onum) =
+(SELECT MAX(cnt) FROM 
+(SELECT  cnum,COUNT(onum) AS cnt 
+FROM orders 
+GROUP BY cnum) AS T);
+--Customers with max no. of rating 
+SELECT  cnum 
+FROM customers 
+WHERE rating =
+(SELECT MAX(rating) FROM customers);
+
+
+ cnum 
+------
+ 2006
+ 2008
+ 2004
+(3 rows)
+
+ cnum 
+------
+ 2004
+ 2008
+(2 rows)
