@@ -1356,3 +1356,147 @@ WHERE rating =
  2004
  2008
 (2 rows)
+
+
+--91) List all customers in descending order of customer rating.
+SELECT cnum,cname
+FROM customers
+ORDER BY rating DESC;
+
+cnum |  cname   
+------+----------
+ 2004 | Grass
+ 2008 | Cisneros
+ 2003 | Liu
+ 2002 | Giovanni
+ 2001 | Hoffman
+ 2006 | Clemens
+ 2007 | Pereira
+(7 rows)
+
+--92) On which days has Hoffman placed orders?
+SELECT odate 
+FROM customers c JOIN orders o
+ON c.cnum = o.cnum
+WHERE c.cname = 'Hoffman';
+
+ odate    
+------------
+ 1990-10-03
+(1 row)
+
+--93) Which salesmen have no orders between 10/03/1990 and 10/05/1990?
+SELECT snum
+FROM orders
+WHERE odate NOT BETWEEN '1990-10-03' AND '1990-10-05';
+
+snum 
+------
+ 1002
+ 1001
+(2 rows)
+
+--94) How many salespersons have succeeded in getting orders?
+SELECT snum
+FROM salespeople s
+WHERE EXISTS(SELECT snum FROM orders o
+			WHERE s.snum = o.snum);
+
+snum 
+------
+ 1001
+ 1002
+ 1004
+ 1007
+ 1003
+(5 rows)
+
+--95) How many customers have placed orders?
+SELECT COUNT(cnum)
+FROM customers c
+WHERE EXISTS(SELECT cnum FROM orders o
+			WHERE c.cnum = o.cnum);
+
+ count 
+-------
+     7
+(1 row)
+
+--96) On which date has each salesman booked an order of maximum value?
+SELECT snum,odate,MAX(amt)
+FROM orders
+GROUP BY snum,odate;
+
+snum |   odate    |   max   
+------+------------+---------
+ 1004 | 1990-10-03 | 1900.10
+ 1001 | 1990-10-03 |  767.19
+ 1002 | 1990-10-06 | 1309.95
+ 1002 | 1990-10-04 |   75.75
+ 1003 | 1990-10-04 | 1713.23
+ 1002 | 1990-10-03 | 5160.45
+ 1001 | 1990-10-06 | 9891.88
+ 1001 | 1990-10-05 | 4723.00
+ 1007 | 1990-10-03 | 1098.16
+(9 rows)
+
+--97) Who is the most successful salesperson?
+SELECT snum,MAX(amt)
+FROM orders
+GROUP BY snum
+LIMIT 1;
+ 
+ snum |   max   
+------+---------
+ 1002 | 5160.45
+(1 row)
+
+--98) Which customers have the same rating?
+SELECT c2.cnum,c2.cname
+FROM customers c1,customers c2
+WHERE c1.rating = c2.rating 
+AND c1.cnum != c2.cnum;
+
+cnum |  cname   
+------+----------
+ 2007 | Pereira
+ 2006 | Clemens
+ 2003 | Liu
+ 2002 | Giovanni
+ 2008 | Cisneros
+ 2007 | Pereira
+ 2001 | Hoffman
+ 2004 | Grass
+ 2006 | Clemens
+ 2001 | Hoffman
+(10 rows)
+
+--99) Find all orders greater than the average for October 4th.
+SELECT onum 
+FROM orders
+WHERE amt >
+(SELECT AVG(amt) FROM orders
+WHERE odate = '1990-10-04');
+
+ onum 
+------
+ 3002
+ 3005
+ 3006
+ 3009
+ 3008
+ 3010
+ 3011
+(7 rows)
+
+--100) List all customers with ratings above Grass’s average.
+ SELECT cname,rating
+ FROM customers
+ WHERE rating >=
+ ( SELECT AVG(rating) FROM customers WHERE cname = 'Grass');
+ cname   | rating 
+----------+--------
+ Grass    |    300
+ Cisneros |    300
+(2 rows)
+ 
