@@ -1500,3 +1500,101 @@ WHERE odate = '1990-10-04');
  Cisneros |    300
 (2 rows)
  
+--101) Which customers have above average orders?
+SELECT C.cnum,cname
+FROM customers C JOIN orders O
+ON C.cnum = o.onum
+WHERE amt >
+(SELECT AVG(amt) FROM Orders);
+
+cnum | cname 
+------+-------
+(0 rows)
+
+
+--102) Select the total amount in orders for each salesperson for which the total is greater than the amount of the largest order in the table.
+SELECT snum,SUM(amt)
+FROM orders
+GROUP BY snum HAVING SUM(amt) > ( SELECT MAX(amt) FROM orders );
+
+ snum |   sum    
+------+----------
+ 1001 | 15382.07
+(1 row)
+
+
+--103) Give names and numbers of all salespersons that have more than one customer?
+SELECT snum,sname
+FROM customers c JOIN salespeople s
+ON c.cnum = s.cnum
+GROUP BY S.snum
+HAVING COUNT(C.cnum) >1;
+
+
+ snum | sname  
+------+--------
+ 1004 | Motika
+ 1008 | Fran
+ 1002 | Serres
+(3 rows)
+
+--104) Select all salespeople by name and number who have customers in their city whom they don’t service.
+SELECT DISTINCT S.snum,S.sname 
+FROM salespeople S
+JOIN customers C
+ON C.snum != S.snum AND C.city = S.city;
+
+
+ total 
+-------
+   285
+(1 row)
+
+
+--105) Does the total amount in orders by customer in Rome and London, exceed the commission paid to salesperson in London, and New York by
+--more than 5 times?
+
+--the query can be completed in two parts
+SELECT SUM(comm)*5 AS total
+FROM orders
+JOIN salespeople
+ON orders.snum = salespeople.snum WHERE city = 'London' OR city = 'New York';
+
+SELECT SUM(amt)
+FROM orders o
+JOIN customers c
+ON o.cnum = c.cnum
+WHERE city = 'Rome' OR city = 'London';
+
+   sum    
+----------
+ 18995.40
+(1 row)
+
+--106) Which are the date, order number, amt and city for each salesperson (by name) for themaximum order he has obtained?
+ SELECT odate,onum,amt,sname
+ FROM orders
+ INNER JOIN salespeople
+ ON salespeople.snum = orders.snum
+ WHERE amt IN ( SELECT MAX(amt) FROM orders GROUP BY snum ) ;
+
+ odate    | onum |   amt   |  sname  
+------------+------+---------+---------
+ 1990-10-03 | 3002 | 1900.10 | Motika
+ 1990-10-03 | 3005 | 5160.45 | Serres
+ 1990-10-03 | 3006 | 1098.16 | Rifkin
+ 1990-10-04 | 3009 | 1713.23 | AxelRod
+ 1990-10-06 | 3011 | 9891.88 | Peel
+(5 rows)
+
+
+--107) Which salesperson is having lowest commission?
+SELECT snum,sname 
+FROM salespeople
+WHERE comm 
+IN (SELECT MIN(comm) FROM salespeople);
+
+ snum |  sname  
+------+---------
+ 1003 | AxelRod
+(1 row)
